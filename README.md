@@ -1,7 +1,7 @@
 # Bacterial Genetics & Data Visualisation — Educational Mini-Project
 
 ## Overview
-This repository contains an educational website and a small Python bioinformatics module. The new DNA sequence component reads FASTA records and reports sequence length, A/C/G/T counts, ambiguous-base count, and GC percentage.
+This repository contains an educational website and a small Python bioinformatics module. The DNA sequence component reads FASTA records and reports sequence length, A/C/G/T counts, ambiguous-base count, and GC percentage. The website also visualises GC% and nucleotide composition; the Python CLI can export a GC% SVG chart.
 
 **Educational only:** the sequence-composition workflow does not identify genes or organisms and cannot establish drug resistance or any clinical conclusion. The existing measurement records have undocumented provenance and must remain labelled **source unverified** until a traceable source is documented.
 
@@ -12,7 +12,7 @@ https://karna508.github.io/index.html/
 Requires Python 3.10+ and no third-party packages.
 
 ```bash
-python code/sequence_analysis.py data/example_sequences.fasta --output outputs/sequence_summary.csv
+python code/sequence_analysis.py data/example_sequences.fasta --output outputs/sequence_summary.csv --chart outputs/gc_comparison.svg
 python -m unittest discover -s tests -v
 ```
 
