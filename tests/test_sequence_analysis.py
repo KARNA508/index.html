@@ -1,8 +1,10 @@
 import tempfile
 import unittest
+import sys
 from pathlib import Path
 
-from code.sequence_analysis import parse_fasta, summarise_sequence, analyse_fasta
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "code"))
+from sequence_analysis import parse_fasta, summarise_sequence, analyse_fasta
 
 
 class SequenceAnalysisTests(unittest.TestCase):
