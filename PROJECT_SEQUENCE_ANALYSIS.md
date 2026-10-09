@@ -10,6 +10,7 @@ This is a beginner-friendly extension to the existing educational website. It ac
 - Counts of A, C, G, and T
 - Count of ambiguous IUPAC DNA symbols (for example, N)
 - GC percentage calculated from canonical A/C/G/T bases only
+- Optional SVG bar chart comparing GC percentage across the input sequences
 
 Ambiguous symbols are excluded from the denominator used for GC percentage. If a sequence contains only ambiguous symbols, GC percentage is reported as 0.00.
 
@@ -18,10 +19,10 @@ Ambiguous symbols are excluded from the denominator used for GC percentage. If a
 From the repository root:
 
 ```bash
-python code/sequence_analysis.py data/example_sequences.fasta --output outputs/sequence_summary.csv
+python code/sequence_analysis.py data/example_sequences.fasta --output outputs/sequence_summary.csv --chart outputs/gc_comparison.svg
 ```
 
-The file `data/example_sequences.fasta` contains short illustrative sequences created for testing. They are not real organism records and should not be cited as biological reference data.
+The optional `--chart` argument creates an SVG bar chart without requiring plotting libraries. The file `data/example_sequences.fasta` contains short illustrative sequences created for testing. They are not real organism records and should not be cited as biological reference data.
 
 ## Test the module
 

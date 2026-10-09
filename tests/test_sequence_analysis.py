@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "code"))
-from sequence_analysis import parse_fasta, summarise_sequence, analyse_fasta
+from sequence_analysis import parse_fasta, summarise_sequence, analyse_fasta, write_gc_chart
 
 
 class SequenceAnalysisTests(unittest.TestCase):
@@ -30,6 +30,19 @@ class SequenceAnalysisTests(unittest.TestCase):
             path.write_text(">empty\n>next\nACGT\n", encoding="utf-8")
             with self.assertRaises(ValueError):
                 parse_fasta(path)
+
+    def test_gc_chart_export(self):
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / "charts" / "gc.svg"
+            rows = [
+                {"Sequence_ID": "seq&one", "GC_percent": 50.0},
+                {"Sequence_ID": "seq_two", "GC_percent": 25.0},
+            ]
+            write_gc_chart(rows, target)
+            chart = target.read_text(encoding="utf-8")
+            self.assertIn("<svg", chart)
+            self.assertIn("50.00%", chart)
+            self.assertIn("seq&amp;one", chart)
 
     def test_csv_export(self):
         with tempfile.TemporaryDirectory() as temp:
