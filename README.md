@@ -29,9 +29,25 @@ python -m unittest discover -s tests -v
 
 The example FASTA contains short illustrative test sequences, not real biological records. For real sequences, retain the original input and document the database/publication, accession, organism label as provided by the source, download date, and usage terms.
 
+## Pairwise DNA alignment
+
+The educational alignment module implements global Needleman–Wunsch alignment with match +1, mismatch −1, and gap −1 scoring.
+
+Python example:
+
+```bash
+python code/pairwise_alignment.py ACGT ACGGT
+python -m unittest discover -s tests -v
+```
+
+To align two FASTA/text files, use `--from-files`. The browser version is available in the Pairwise DNA Sequence Alignment section of the website and accepts sequences up to 500 bases each. See [the pairwise alignment guide](PAIRWISE_ALIGNMENT_GUIDE.md) for scoring details and limitations.
+
 ## Repository guide
 - `index.html` — website, including a browser-based FASTA composition explorer.
 - `code/sequence_analysis.py` — command-line FASTA parser and CSV summary generator.
+- `code/pairwise_alignment.py` — global Needleman–Wunsch alignment for two DNA sequences.
+- `tests/test_pairwise_alignment.py` — alignment tests.
+- `PAIRWISE_ALIGNMENT_GUIDE.md` — scoring method, interpretation, and limitations.
 - `data/example_sequences.fasta` — clearly labelled illustrative test input.
 - `tests/test_sequence_analysis.py` — automated unit tests.
 - `PROJECT_SEQUENCE_ANALYSIS.md` — methods, run instructions, provenance checklist, and limitations.
