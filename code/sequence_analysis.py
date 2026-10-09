@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+from html import escape
 from pathlib import Path
-from typing import Iterable
 
 VALID_IUPAC_DNA = set("ACGTRYSWKMBDHVN")
 BASES = "ACGT"
@@ -107,13 +107,53 @@ def analyse_fasta(input_path: str | Path, output_path: str | Path) -> list[dict[
     return rows
 
 
+def write_gc_chart(rows: list[dict[str, int | float | str]], output_path: str | Path) -> None:
+    """Write a dependency-free SVG bar chart comparing GC percentages."""
+    if not rows:
+        raise ValueError("Cannot create a chart without sequence summary rows.")
+    width = 760
+    left = 220
+    right = 70
+    top = 65
+    row_height = 42
+    height = top + len(rows) * row_height + 35
+    plot_width = width - left - right
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+        '<title id="title">GC percentage by DNA sequence</title>',
+        '<desc id="desc">Bar chart of GC percentage calculated from canonical A, C, G, and T bases only.</desc>',
+        '<rect width="100%" height="100%" fill="#ffffff"/>',
+        '<text x="20" y="30" font-family="sans-serif" font-size="18" font-weight="bold" fill="#0f172a">GC percentage by sequence</text>',
+    ]
+    for tick in (0, 25, 50, 75, 100):
+        x = left + plot_width * tick / 100
+        parts.append(f'<line x1="{x:.1f}" y1="{top-8}" x2="{x:.1f}" y2="{height-25}" stroke="#e2e8f0"/>')
+        parts.append(f'<text x="{x:.1f}" y="{height-8}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#475569">{tick}%</text>')
+    for index, row in enumerate(rows):
+        y = top + index * row_height
+        label = escape(str(row["Sequence_ID"]))
+        gc = max(0.0, min(100.0, float(row["GC_percent"])))
+        parts.append(f'<text x="{left-12}" y="{y+17}" text-anchor="end" font-family="sans-serif" font-size="12" fill="#1e293b">{label}</text>')
+        parts.append(f'<rect x="{left}" y="{y}" width="{plot_width}" height="22" rx="4" fill="#f1f5f9"/>')
+        parts.append(f'<rect x="{left}" y="{y}" width="{plot_width*gc/100:.2f}" height="22" rx="4" fill="#2563eb"/>')
+        parts.append(f'<text x="{min(left + plot_width*gc/100 + 8, width-48):.1f}" y="{y+16}" font-family="sans-serif" font-size="11" fill="#0f172a">{gc:.2f}%</text>')
+    parts.append("</svg>")
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(parts), encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Summarise DNA FASTA sequence composition.")
     parser.add_argument("input_fasta", help="Path to a DNA FASTA file")
     parser.add_argument("-o", "--output", default="sequence_summary.csv", help="Output CSV path (default: sequence_summary.csv)")
+    parser.add_argument("--chart", help="Optional path for a GC percentage SVG chart")
     args = parser.parse_args()
     rows = analyse_fasta(args.input_fasta, args.output)
     print(f"Analysed {len(rows)} sequence(s). Results written to {args.output}")
+    if args.chart:
+        write_gc_chart(rows, args.chart)
+        print(f"GC percentage chart written to {args.chart}")
     print("Reminder: sequence composition alone does not establish biological function or drug resistance.")
 
 
