@@ -110,6 +110,21 @@
   .plot { max-width: 100%; border-radius: 10px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); border: 1px solid var(--border); }
   .plot-caption { font-size: 0.88rem; color: var(--muted); margin-top: 0.45rem; text-align: center; }
 
+  .sequence-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+  .sequence-chart { border: 1px solid var(--border); border-radius: 10px; padding: 1rem; min-width: 0; background: #fff; }
+  .sequence-chart h3 { margin-top: 0; }
+  .sequence-bar-row { margin: 0.9rem 0; }
+  .sequence-bar-label { display: flex; justify-content: space-between; gap: 0.7rem; font-size: 0.86rem; margin-bottom: 0.3rem; overflow-wrap: anywhere; }
+  .sequence-bar-track { height: 1rem; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
+  .sequence-bar-fill { height: 100%; border-radius: 6px; min-width: 0; }
+  .base-stack { display: flex; height: 1rem; overflow: hidden; border-radius: 6px; background: #e2e8f0; }
+  .base-a { background: #2563eb; } .base-c { background: #16a34a; } .base-g { background: #f59e0b; } .base-t { background: #9333ea; }
+  .sequence-legend { display: flex; flex-wrap: wrap; gap: 0.7rem; font-size: 0.82rem; margin-top: 0.65rem; }
+  .sequence-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .legend-dot { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 3px; }
+  @media (max-width: 680px) { .sequence-chart-grid { grid-template-columns: 1fr; } }
+
+
   .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.9rem; margin: 1.2rem 0; }
   .stat-card { text-align: center; padding: 1.1rem; border-radius: 12px; border: 1px solid var(--border); }
   .stat-card.s { background: #f0fdf4; border-color: #bbf7d0; }
@@ -303,6 +318,21 @@
       <button class="btn" id="analyse-fasta" type="button" style="margin-top:0.8rem;">Analyse sequences</button>
       <div id="fasta-message" role="status" aria-live="polite" style="margin-top:0.9rem;"></div>
       <div id="fasta-output" style="overflow-x:auto;margin-top:1rem;"></div>
+      <div id="sequence-charts" class="sequence-chart-grid" hidden>
+        <div class="sequence-chart">
+          <h3>GC percentage comparison</h3>
+          <p class="plot-caption" style="text-align:left;">GC% is calculated using only A, C, G and T bases. Ambiguous symbols are excluded.</p>
+          <div id="gc-chart" role="img" aria-label="GC percentage comparison across input sequences"></div>
+        </div>
+        <div class="sequence-chart">
+          <h3>Nucleotide composition</h3>
+          <p class="plot-caption" style="text-align:left;">Each bar shows the proportion of A, C, G and T among canonical bases for that sequence.</p>
+          <div id="base-chart" role="img" aria-label="Nucleotide composition across input sequences"></div>
+          <div class="sequence-legend" aria-label="Nucleotide colour legend">
+            <span><i class="legend-dot base-a"></i>A</span><span><i class="legend-dot base-c"></i>C</span><span><i class="legend-dot base-g"></i>G</span><span><i class="legend-dot base-t"></i>T</span>
+          </div>
+        </div>
+      </div>
       <button class="btn" id="download-fasta-csv" type="button" hidden style="margin-top:0.8rem;">Download summary CSV</button>
       <p class="plot-caption">Example FASTA files in this repository are illustrative test inputs, not real reference sequences.</p>
     </div>
@@ -361,6 +391,63 @@ function parseFastaText(text) {
   return records;
 }
 
+function renderSequenceCharts(records, rows) {
+  const charts = document.getElementById("sequence-charts");
+  const gcChart = document.getElementById("gc-chart");
+  const baseChart = document.getElementById("base-chart");
+  gcChart.replaceChildren();
+  baseChart.replaceChildren();
+  charts.hidden = false;
+
+  rows.forEach(row => {
+    const gcRow = document.createElement("div");
+    gcRow.className = "sequence-bar-row";
+    const label = document.createElement("div");
+    label.className = "sequence-bar-label";
+    const name = document.createElement("span");
+    name.textContent = row.Sequence_ID;
+    const value = document.createElement("strong");
+    value.textContent = row.GC_percent.toFixed(2) + "%";
+    label.append(name, value);
+    const track = document.createElement("div");
+    track.className = "sequence-bar-track";
+    track.setAttribute("aria-hidden", "true");
+    const fill = document.createElement("div");
+    fill.className = "sequence-bar-fill";
+    fill.style.width = Math.max(0, Math.min(100, row.GC_percent)) + "%";
+    fill.style.background = "#2563eb";
+    track.appendChild(fill);
+    gcRow.append(label, track);
+    gcChart.appendChild(gcRow);
+  });
+
+  records.forEach(record => {
+    const row = rows.find(item => item.Sequence_ID === record.id);
+    const baseRow = document.createElement("div");
+    baseRow.className = "sequence-bar-row";
+    const label = document.createElement("div");
+    label.className = "sequence-bar-label";
+    const name = document.createElement("span");
+    name.textContent = record.id;
+    const total = row.A_count + row.C_count + row.G_count + row.T_count;
+    const value = document.createElement("strong");
+    value.textContent = total ? total + " canonical bases" : "No A/C/G/T bases";
+    label.append(name, value);
+    const stack = document.createElement("div");
+    stack.className = "base-stack";
+    stack.setAttribute("aria-hidden", "true");
+    [["A", row.A_count, "base-a"], ["C", row.C_count, "base-c"], ["G", row.G_count, "base-g"], ["T", row.T_count, "base-t"]].forEach(([base, count, css]) => {
+      const part = document.createElement("div");
+      part.className = css;
+      part.style.width = (total ? Number(count) / total * 100 : 0) + "%";
+      part.title = base + ": " + count;
+      stack.appendChild(part);
+    });
+    baseRow.append(label, stack);
+    baseChart.appendChild(baseRow);
+  });
+}
+
 function analyseSequences() {
   const message = document.getElementById("fasta-message");
   const output = document.getElementById("fasta-output");
@@ -388,10 +475,14 @@ function analyseSequences() {
       tbody.appendChild(tr);
     });
     table.appendChild(tbody); output.appendChild(table);
+    renderSequenceCharts(records, lastSequenceRows);
     message.textContent = "Successfully analysed " + lastSequenceRows.length + " sequence(s). GC% uses A/C/G/T bases only; ambiguous symbols are excluded from its denominator.";
     download.hidden = false;
   } catch (error) {
     lastSequenceRows = [];
+    document.getElementById("sequence-charts").hidden = true;
+    document.getElementById("gc-chart").replaceChildren();
+    document.getElementById("base-chart").replaceChildren();
     message.textContent = "Could not analyse FASTA: " + error.message;
   }
 }
