@@ -20,6 +20,22 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 3px solid #f59e0b; outline-offset: 3px;
+  }
+  .skip-link {
+    position: absolute; left: 0.75rem; top: -5rem; z-index: 1000;
+    background: #fff; color: #0f172a; padding: 0.7rem 1rem; border-radius: 0.5rem;
+  }
+  .skip-link:focus { top: 0.75rem; }
+  .notice {
+    background: #fff7ed; border: 1px solid #fdba74; border-left: 5px solid #c2410c;
+    color: #7c2d12; border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1.4rem;
+  }
   body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg);
@@ -140,7 +156,9 @@
 
   @media (max-width: 700px) {
     .hero h1 { font-size: 1.6rem; }
-    .nav-links { display: none; }
+    .nav-inner { align-items: flex-start; flex-direction: column; gap: 0.55rem; }
+    .nav-links { display: flex; gap: 0.55rem 0.9rem; }
+    .nav-links a { display: inline-block; padding: 0.2rem 0; }
     .stats { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
     .card { padding: 1.3rem 1.1rem; }
@@ -149,8 +167,9 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
-<nav>
+<nav aria-label="Main navigation">
   <div class="nav-inner">
     <div class="logo">Resistance Module</div>
     <ul class="nav-links">
@@ -174,7 +193,10 @@
   </div>
 </section>
 
-<div class="container">
+<main id="main-content" class="container">
+  <aside class="notice" role="note" aria-label="Educational-use notice">
+    <strong>Educational demonstration only.</strong> This page is not a validated diagnostic tool and must not be used to make treatment decisions. The displayed example statistics and classifications have not been independently verified against a cited dataset or current laboratory standard.
+  </aside>
 
   <!-- LIVE CHECKER (first so it is prominent) -->
   <section id="checker">
@@ -194,7 +216,7 @@
       </div>
       <button class="btn" onclick="checkResistance()">Check Resistance</button>
 
-      <div id="result" class="result-box">
+      <div id="result" class="result-box" role="status" aria-live="polite" aria-atomic="true">
         <div class="result-title" id="resultTitle">—</div>
         <div id="resultDetail"></div>
       </div>
@@ -320,7 +342,7 @@
     </div>
   </section>
 
-</div>
+</main>
 
 <footer>
   <strong>Programming with Generative AI – Mini Project</strong><br>
