@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bacterial Resistance Concepts | Simulated Data Mini Project</title>
+<title>Bacterial Genetics &amp; Data Visualisation | Educational Mini Project</title>
 <style>
   :root {
     --primary: #0f172a;
@@ -174,6 +174,7 @@
     <div class="logo">Resistance Module</div>
     <ul class="nav-links">
       <li><a href="#checker">Measurement Explorer</a></li>
+      <li><a href="#sequence-analysis">DNA Sequence Analysis</a></li>
       <li><a href="#topic">Topic</a></li>
       <li><a href="#theory">Theory</a></li>
       <li><a href="#verification">Verification</a></li>
@@ -185,7 +186,7 @@
 
 <section class="hero">
   <h1>How Bacteria Develop<br>Resistance to Drugs</h1>
-  <p>An educational mini-project exploring bacterial resistance concepts with clearly labelled simulated measurements</p>
+  <p>An educational bioinformatics mini-project with a measurement explainer and a DNA sequence composition explorer</p>
   <div class="hero-badges">
     <span class="hero-badge">Programming with Generative AI</span>
     <span class="hero-badge">Escherichia coli</span>
@@ -195,7 +196,7 @@
 
 <main id="main-content" class="container">
   <aside class="notice" role="note" aria-label="Educational-use notice">
-    <strong>SIMULATED DATA — EDUCATIONAL USE ONLY.</strong> The eight records used in this project were created as sample data for learning. They are not NCBI records, verified laboratory measurements, or patient data. This website does not diagnose infection, verify resistance, or recommend treatment. No clinical classifications or treatment decisions should be made from this demonstration.
+    <strong>DATA ORIGIN UNVERIFIED — EDUCATIONAL USE ONLY.</strong> The source of the eight measurement records has not been documented. Do not describe them as simulated, database-derived, laboratory-verified, or patient data without evidence. This website is an educational demonstration, not a diagnostic tool or clinical decision-support system.
   </aside>
 
   <!-- EDUCATIONAL MEASUREMENT EXPLORER -->
@@ -233,7 +234,7 @@
         <strong>Refined Sub-problem:</strong><br>
         How can programming help students organise and visualise simulated examples of inhibition-zone and minimum inhibitory concentration (MIC) measurements while learning about bacterial resistance?
       </div>
-      <p><strong>Motivation:</strong> Learn how laboratory measurements are represented in data tables and visualisations. The sample values are invented for practice and cannot support clinical conclusions.</p>
+      <p><strong>Motivation:</strong> Learn how biological data can be organised and visualised. The provenance of the existing measurement records remains unverified, so they cannot support scientific or clinical conclusions.</p>
     </div>
   </section>
 
@@ -262,10 +263,10 @@
   <!-- Simulated data summary -->
   <section id="results">
     <div class="card">
-      <h2><span class="num">4</span> Simulated Example Dataset</h2>
-      <p>The accompanying CSV contains <strong>8 invented sample records</strong> created for this educational exercise. The labels such as “Patient” and “Clinical” in the original sample names do not mean these are real patient or clinical data.</p>
+      <h2><span class="num">4</span> Existing Measurement Dataset</h2>
+      <p>The accompanying CSV contains <strong>8 records with undocumented provenance</strong>. Their origin has not been verified. The labels in sample names are not evidence that the records are real patient data or verified laboratory observations.</p>
       <div class="stats">
-        <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Invented sample records</div></div>
+        <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Records with unverified origin</div></div>
         <div class="stat-card"><div class="stat-value">2</div><div class="stat-label">Measurement types: zone and MIC</div></div>
         <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Verified clinical findings</div></div>
       </div>
@@ -283,7 +284,27 @@
           <tr><td>S8</td><td>26</td><td>0.25</td></tr>
         </tbody>
       </table>
-      <p class="plot-caption">These values are illustrative only. They are not evidence about real bacterial isolates and must not be reported as NCBI-derived statistics.</p>
+      <p class="plot-caption">The source of these values is unverified. Do not interpret them as confirmed biological findings or attribute them to a database without traceable evidence.</p>
+    </div>
+  </section>
+
+  <!-- DNA sequence composition explorer: runs locally in the browser -->
+  <section id="sequence-analysis">
+    <div class="card">
+      <h2><span class="num">3</span> DNA Sequence Composition Explorer</h2>
+      <p>Paste DNA FASTA records or load a local FASTA file. The analysis runs in this browser; the sequence text is not uploaded to a server.</p>
+      <div class="highlight-box"><strong>Educational scope:</strong> This tool reports sequence length, A/C/G/T counts, ambiguous symbols, and GC percentage. Composition alone does not identify a gene or organism and cannot establish drug resistance.</div>
+      <label for="fasta-file">Load a local FASTA file (optional)</label>
+      <input id="fasta-file" type="file" accept=".fa,.fasta,.fna,.txt,text/plain" aria-describedby="fasta-help" style="margin:0.3rem 0 0.8rem;">
+      <p id="fasta-help" class="plot-caption" style="text-align:left;">Use FASTA format: each record begins with a line starting with &gt;, followed by DNA sequence lines. For real sequences, record their source and accession separately.</p>
+      <p><a href="https://raw.githubusercontent.com/KARNA508/index.html/sequence-analysis-v1/data/example_sequences.fasta">Download illustrative example FASTA</a> (test data only).</p>
+      <label for="fasta-input">FASTA sequence text</label>
+      <textarea id="fasta-input" rows="8" spellcheck="false" style="width:100%;padding:0.8rem;border:2px solid var(--border);border-radius:10px;font:0.92rem ui-monospace,monospace;" placeholder=">example_sequence&#10;ACGTACGTNN"></textarea>
+      <button class="btn" id="analyse-fasta" type="button" style="margin-top:0.8rem;">Analyse sequences</button>
+      <div id="fasta-message" role="status" aria-live="polite" style="margin-top:0.9rem;"></div>
+      <div id="fasta-output" style="overflow-x:auto;margin-top:1rem;"></div>
+      <button class="btn" id="download-fasta-csv" type="button" hidden style="margin-top:0.8rem;">Download summary CSV</button>
+      <p class="plot-caption">Example FASTA files in this repository are illustrative test inputs, not real reference sequences.</p>
     </div>
   </section>
 
@@ -292,7 +313,7 @@
     <div class="card">
       <h2><span class="num">5</span> Key Takeaway</h2>
       <div class="highlight-box">
-        This project demonstrates how simulated measurements can be stored, explained, and displayed with code. Because the records are invented, the project cannot verify resistance or establish clinical conclusions.
+        This project demonstrates how biological data can be organised, explained, and visualised with code. Because the source of the existing measurement records has not been verified, they cannot establish scientific or clinical conclusions.
       </div>
     </div>
   </section>
@@ -305,6 +326,97 @@
 </footer>
 
 <script>
+const IUPAC_DNA = new Set("ACGTRYSWKMBDHVN");
+let lastSequenceRows = [];
+
+function parseFastaText(text) {
+  const records = [];
+  let id = null;
+  let chunks = [];
+  const finish = () => {
+    if (id === null) return;
+    const sequence = chunks.join("").replace(/\s/g, "").toUpperCase();
+    if (!sequence) throw new Error('FASTA record "' + id + '" has an empty sequence.');
+    const invalid = [...new Set([...sequence].filter(base => !IUPAC_DNA.has(base)))];
+    if (invalid.length) throw new Error('Invalid DNA symbol(s) in "' + id + '": ' + invalid.join(", "));
+    records.push({ id, sequence });
+  };
+  for (const [index, raw] of text.split(/\r?\n/).entries()) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith(">")) {
+      finish();
+      id = line.slice(1).trim();
+      if (!id) throw new Error("Missing FASTA identifier on line " + (index + 1) + ".");
+      chunks = [];
+    } else {
+      if (id === null) throw new Error("Sequence text appears before a FASTA header on line " + (index + 1) + ".");
+      chunks.push(line);
+    }
+  }
+  finish();
+  if (!records.length) throw new Error("No FASTA records found. Add a header line beginning with >.");
+  const ids = records.map(record => record.id);
+  if (new Set(ids).size !== ids.length) throw new Error("FASTA identifiers must be unique.");
+  return records;
+}
+
+function analyseSequences() {
+  const message = document.getElementById("fasta-message");
+  const output = document.getElementById("fasta-output");
+  const download = document.getElementById("download-fasta-csv");
+  output.replaceChildren();
+  download.hidden = true;
+  try {
+    const records = parseFastaText(document.getElementById("fasta-input").value);
+    lastSequenceRows = records.map(({id, sequence}) => {
+      const count = base => [...sequence].filter(char => char === base).length;
+      const a = count("A"), c = count("C"), g = count("G"), t = count("T");
+      const canonical = a + c + g + t;
+      return {Sequence_ID:id, Length_bp:sequence.length, A_count:a, C_count:c, G_count:g, T_count:t,
+        Ambiguous_bases:sequence.length-canonical, GC_percent:canonical ? Number(((g+c)/canonical*100).toFixed(2)) : 0};
+    });
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const header = document.createElement("tr");
+    Object.keys(lastSequenceRows[0]).forEach(key => { const th = document.createElement("th"); th.textContent = key; header.appendChild(th); });
+    thead.appendChild(header); table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    lastSequenceRows.forEach(row => {
+      const tr = document.createElement("tr");
+      Object.values(row).forEach(value => { const td = document.createElement("td"); td.textContent = String(value); tr.appendChild(td); });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody); output.appendChild(table);
+    message.textContent = "Successfully analysed " + lastSequenceRows.length + " sequence(s). GC% uses A/C/G/T bases only; ambiguous symbols are excluded from its denominator.";
+    download.hidden = false;
+  } catch (error) {
+    lastSequenceRows = [];
+    message.textContent = "Could not analyse FASTA: " + error.message;
+  }
+}
+
+document.getElementById("analyse-fasta").addEventListener("click", analyseSequences);
+document.getElementById("fasta-file").addEventListener("change", async event => {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  try {
+    document.getElementById("fasta-input").value = await file.text();
+    document.getElementById("fasta-message").textContent = "Loaded " + file.name + ". Select Analyse sequences to process it locally.";
+  } catch (error) {
+    document.getElementById("fasta-message").textContent = "Could not read that file. Try a plain-text FASTA file.";
+  }
+});
+document.getElementById("download-fasta-csv").addEventListener("click", () => {
+  if (!lastSequenceRows.length) return;
+  const columns = Object.keys(lastSequenceRows[0]);
+  const csvCell = value => '"' + String(value).replace(/"/g, '""') + '"';
+  const csv = [columns.join(","), ...lastSequenceRows.map(row => columns.map(key => csvCell(row[key])).join(","))].join("\r\n");
+  const url = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8;"}));
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = "sequence_summary.csv";
+  document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
+});
+
 function explainMeasurements() {
   const zoneRaw = document.getElementById('zone').value.trim();
   const micRaw = document.getElementById('mic').value.trim();
