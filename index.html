@@ -121,6 +121,11 @@
   .base-a { background: #2563eb; } .base-c { background: #16a34a; } .base-g { background: #f59e0b; } .base-t { background: #9333ea; }
   .sequence-legend { display: flex; flex-wrap: wrap; gap: 0.7rem; font-size: 0.82rem; margin-top: 0.65rem; }
   .sequence-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .alignment-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin:1rem 0; }
+  .alignment-input { width:100%; min-height:7rem; padding:0.8rem; border:2px solid var(--border); border-radius:10px; font:0.92rem ui-monospace,monospace; }
+  .alignment-output { overflow-x:auto; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:1rem; margin-top:1rem; }
+  .alignment-output pre { font:0.92rem/1.8 ui-monospace,monospace; white-space:pre; margin:0; }
+  @media (max-width:680px) { .alignment-grid { grid-template-columns:1fr; } }
   .legend-dot { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 3px; }
   @media (max-width: 680px) { .sequence-chart-grid { grid-template-columns: 1fr; } }
 
@@ -190,6 +195,7 @@
     <ul class="nav-links">
       <li><a href="#checker">Measurement Explorer</a></li>
       <li><a href="#sequence-analysis">DNA Sequence Analysis</a></li>
+      <li><a href="#pairwise-alignment">Pairwise Alignment</a></li>
       <li><a href="#topic">Topic</a></li>
       <li><a href="#theory">Theory</a></li>
       <li><a href="#verification">Verification</a></li>
@@ -335,6 +341,32 @@
       </div>
       <button class="btn" id="download-fasta-csv" type="button" hidden style="margin-top:0.8rem;">Download summary CSV</button>
       <p class="plot-caption">Example FASTA files in this repository are illustrative test inputs, not real reference sequences.</p>
+    </div>
+  </section>
+
+  <!-- Pairwise DNA alignment: local educational Needleman-Wunsch implementation -->
+  <section id="pairwise-alignment">
+    <div class="card">
+      <h2><span class="num">4</span> Pairwise DNA Sequence Alignment</h2>
+      <p>Compare two short DNA sequences with a global alignment. The tool uses Needleman–Wunsch dynamic programming and runs locally in your browser.</p>
+      <div class="highlight-box"><strong>Default scoring:</strong> match +1, mismatch −1, gap −1. These are simple teaching values, not a calibrated biological scoring system. Alignment similarity alone does not identify a gene or establish biological function or phenotype.</div>
+      <div class="alignment-grid">
+        <div>
+          <label for="align-seq-a">Sequence A (DNA or FASTA)</label>
+          <textarea id="align-seq-a" class="alignment-input" spellcheck="false" placeholder=">sequence_A&#10;ACGTACGT"></textarea>
+        </div>
+        <div>
+          <label for="align-seq-b">Sequence B (DNA or FASTA)</label>
+          <textarea id="align-seq-b" class="alignment-input" spellcheck="false" placeholder=">sequence_B&#10;ACGTTACGT"></textarea>
+        </div>
+      </div>
+      <p class="plot-caption" style="text-align:left;">For responsiveness, this browser demo accepts up to 500 bases per sequence. IUPAC DNA symbols are accepted; only identical symbols count as exact matches.</p>
+      <button class="btn" id="run-alignment" type="button">Align sequences</button>
+      <div id="alignment-message" role="status" aria-live="polite" style="margin-top:0.9rem;"></div>
+      <div id="alignment-results" class="alignment-output" hidden>
+        <p id="alignment-summary"></p>
+        <pre id="alignment-text"></pre>
+      </div>
     </div>
   </section>
 
@@ -507,6 +539,79 @@ document.getElementById("download-fasta-csv").addEventListener("click", () => {
   const anchor = document.createElement("a"); anchor.href = url; anchor.download = "sequence_summary.csv";
   document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
 });
+
+const ALIGNMENT_IUPAC = new Set("ACGTRYSWKMBDHVN");
+
+function cleanAlignmentInput(raw, label) {
+  const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const sequenceLines = lines.length && lines[0].startsWith(">")
+    ? lines.filter(line => !line.startsWith(">"))
+    : lines;
+  const sequence = sequenceLines.join("").replace(/\s/g, "").toUpperCase();
+  if (!sequence) throw new Error(label + " is empty.");
+  const invalid = [...new Set([...sequence].filter(base => !ALIGNMENT_IUPAC.has(base)))];
+  if (invalid.length) throw new Error(label + " has invalid DNA symbols: " + invalid.join(", "));
+  if (sequence.length > 500) throw new Error(label + " exceeds the 500-base limit for this browser demo.");
+  return sequence;
+}
+
+function needlemanWunsch(sequenceA, sequenceB) {
+  const rows = sequenceA.length + 1;
+  const cols = sequenceB.length + 1;
+  const scores = Array.from({length:rows}, () => Array(cols).fill(0));
+  const trace = Array.from({length:rows}, () => Array(cols).fill(""));
+  for (let i=1;i<rows;i++) { scores[i][0] = -i; trace[i][0] = "up"; }
+  for (let j=1;j<cols;j++) { scores[0][j] = -j; trace[0][j] = "left"; }
+  for (let i=1;i<rows;i++) {
+    for (let j=1;j<cols;j++) {
+      const diagonal = scores[i-1][j-1] + (sequenceA[i-1] === sequenceB[j-1] ? 1 : -1);
+      const up = scores[i-1][j] - 1;
+      const left = scores[i][j-1] - 1;
+      const best = Math.max(diagonal, up, left);
+      scores[i][j] = best;
+      trace[i][j] = diagonal === best ? "diag" : (up === best ? "up" : "left");
+    }
+  }
+  let i=sequenceA.length, j=sequenceB.length;
+  const alignedA=[], alignedB=[];
+  while (i>0 || j>0) {
+    const direction = trace[i][j];
+    if (i>0 && j>0 && direction==="diag") {
+      alignedA.push(sequenceA[--i]); alignedB.push(sequenceB[--j]);
+    } else if (i>0 && (j===0 || direction==="up")) {
+      alignedA.push(sequenceA[--i]); alignedB.push("-");
+    } else {
+      alignedA.push("-"); alignedB.push(sequenceB[--j]);
+    }
+  }
+  alignedA.reverse(); alignedB.reverse();
+  const a = alignedA.join(""), b = alignedB.join("");
+  const matchLine = [...a].map((base,index) => base === b[index] && base !== "-" ? "|" : " ").join("");
+  const matches = [...a].filter((base,index) => base === b[index] && base !== "-").length;
+  return {a,b,matchLine,score:scores[rows-1][cols-1],matches,length:a.length,identity:a.length ? matches/a.length*100 : 0};
+}
+
+function runPairwiseAlignment() {
+  const message = document.getElementById("alignment-message");
+  const results = document.getElementById("alignment-results");
+  results.hidden = true;
+  try {
+    const a = cleanAlignmentInput(document.getElementById("align-seq-a").value, "Sequence A");
+    const b = cleanAlignmentInput(document.getElementById("align-seq-b").value, "Sequence B");
+    const result = needlemanWunsch(a,b);
+    document.getElementById("alignment-summary").textContent =
+      "Alignment score: " + result.score + " | Exact matches: " + result.matches + "/" + result.length +
+      " | Identity: " + result.identity.toFixed(2) + "%";
+    document.getElementById("alignment-text").textContent =
+      "Sequence A  " + result.a + "\n            " + result.matchLine + "\nSequence B  " + result.b;
+    results.hidden = false;
+    message.textContent = "Alignment complete. Gaps are shown as hyphens; vertical bars mark identical non-gap symbols.";
+  } catch (error) {
+    message.textContent = "Could not align sequences: " + error.message;
+  }
+}
+
+document.getElementById("run-alignment").addEventListener("click", runPairwiseAlignment);
 
 function explainMeasurements() {
   const zoneRaw = document.getElementById('zone').value.trim();
