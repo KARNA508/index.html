@@ -543,11 +543,11 @@ document.getElementById("download-fasta-csv").addEventListener("click", () => {
 const ALIGNMENT_IUPAC = new Set("ACGTRYSWKMBDHVN");
 
 function cleanAlignmentInput(raw, label) {
-  const lines = raw.split(/\\r?\\n/).map(line => line.trim()).filter(Boolean);
+  const lines = raw.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
   const sequenceLines = lines.length && lines[0].startsWith(">")
     ? lines.filter(line => !line.startsWith(">"))
     : lines;
-  const sequence = sequenceLines.join("").replace(/\\s/g, "").toUpperCase();
+  const sequence = sequenceLines.join("").replace(/\s/g, "").toUpperCase();
   if (!sequence) throw new Error(label + " is empty.");
   const invalid = [...new Set([...sequence].filter(base => !ALIGNMENT_IUPAC.has(base)))];
   if (invalid.length) throw new Error(label + " has invalid DNA symbols: " + invalid.join(", "));
@@ -603,7 +603,7 @@ function runPairwiseAlignment() {
       "Alignment score: " + result.score + " | Exact matches: " + result.matches + "/" + result.length +
       " | Identity: " + result.identity.toFixed(2) + "%";
     document.getElementById("alignment-text").textContent =
-      "Sequence A  " + result.a + "\\n            " + result.matchLine + "\\nSequence B  " + result.b;
+      "Sequence A  " + result.a + "\n            " + result.matchLine + "\nSequence B  " + result.b;
     results.hidden = false;
     message.textContent = "Alignment complete. Gaps are shown as hyphens; vertical bars mark identical non-gap symbols.";
   } catch (error) {
