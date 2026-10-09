@@ -334,13 +334,13 @@ function parseFastaText(text) {
   let chunks = [];
   const finish = () => {
     if (id === null) return;
-    const sequence = chunks.join("").replace(/\\s/g, "").toUpperCase();
-    if (!sequence) throw new Error("FASTA record \"" + id + "\" has an empty sequence.");
+    const sequence = chunks.join("").replace(/\s/g, "").toUpperCase();
+    if (!sequence) throw new Error('FASTA record "' + id + '" has an empty sequence.');
     const invalid = [...new Set([...sequence].filter(base => !IUPAC_DNA.has(base)))];
-    if (invalid.length) throw new Error("Invalid DNA symbol(s) in \"" + id + "\": " + invalid.join(", "));
+    if (invalid.length) throw new Error('Invalid DNA symbol(s) in "' + id + '": ' + invalid.join(", "));
     records.push({ id, sequence });
   };
-  for (const [index, raw] of text.split(/\\r?\\n/).entries()) {
+  for (const [index, raw] of text.split(/\r?\n/).entries()) {
     const line = raw.trim();
     if (!line) continue;
     if (line.startsWith(">")) {
@@ -409,8 +409,8 @@ document.getElementById("fasta-file").addEventListener("change", async event => 
 document.getElementById("download-fasta-csv").addEventListener("click", () => {
   if (!lastSequenceRows.length) return;
   const columns = Object.keys(lastSequenceRows[0]);
-  const csvCell = value => \"" + String(value).replace(/"/g, '""') + "\"";
-  const csv = [columns.join(","), ...lastSequenceRows.map(row => columns.map(key => csvCell(row[key])).join(","))].join("\\r\\n");
+  const csvCell = value => '"' + String(value).replace(/"/g, '""') + '"';
+  const csv = [columns.join(","), ...lastSequenceRows.map(row => columns.map(key => csvCell(row[key])).join(","))].join("\r\n");
   const url = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8;"}));
   const anchor = document.createElement("a"); anchor.href = url; anchor.download = "sequence_summary.csv";
   document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
